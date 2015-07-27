@@ -1,4 +1,4 @@
-== Go-typeform
+## Go-typeform
 
 A go wrapper for the typeform io api
 
