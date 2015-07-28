@@ -47,7 +47,7 @@ func (f *Form) Create(authToken string, formSubmission *FormSubmission) (resp *F
 	return resp, nil
 }
 
-func (f *Form) Get() {
+func (f *Form) Get(authToken string) {
 
 }
 
@@ -65,9 +65,54 @@ type FormSubmission struct {
 	WebhookSubmitURL string `json:"webhook_submit_url"`
 }
 
-func NewField(choices []Choice, description string, question string, required bool, fieldType string) *Field {
+Choices []Choice `json:"choices"`
+
+//ShortTextField
+//LongTextField
+//MultipleChoiceField
+//PictureChoiceField
+//StatementField
+//DropdownField
+//YesNoField
+//NumberField
+//RatingField
+//OpinionScaleField
+//EmailField
+//WebsiteField
+//LegalField
+
+
+
+type TextField struct {
+	*Field
+	MaxCharacters int `json:"max_characters"`
+}
+
+func NewTextField(maxCharacters int, description string, question string, required bool, fieldType string) {
+	return &TextField{
+		MaxCharacters: maxCharacters,
+		Field: NewField(description, question, required, fieldType),
+	}
+
+}
+
+func NewLongTextField(maxCharacters int, description string, question string, required bool) {
+	return &TextField{
+		MaxCharacters: maxCharacters,
+		Field: NewField(description, question, required, "long_text"),
+	}
+
+}
+
+func NewShortTextField(maxCharacters int, description string, question string, required bool) {
+	return &TextField{
+		MaxCharacters: maxCharacters,
+		Field: NewField(description, question, required, "short_text"),
+	}
+}
+
+func NewField(description string, question string, required bool, fieldType string) *Field {
 	return &Field{
-		Choices : choices,
 		Description : description,
 		Question : question,
 		Required : required,
@@ -76,7 +121,6 @@ func NewField(choices []Choice, description string, question string, required bo
 }
 
 type Field struct {
-	Choices []Choice `json:"choices"`
 	Description string `json:"description"`
 	Question    string `json:"question"`
 	Required    bool   `json:"required"`
