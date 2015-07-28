@@ -1,6 +1,6 @@
 package typeform
 
-type Design struct
+type Design struct {}
 
 func (d *Design) Create () {
 
