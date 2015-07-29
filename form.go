@@ -1,32 +1,32 @@
 package typeform
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"net/http"
-	"bytes"
 	"log"
+	"net/http"
 	"net/http/httputil"
 )
 
 func CreateForm(authToken string, debug bool, formSubmission *FormSubmission) (*FormSubmissionResponse, error) {
 	rawSubmission, err := json.Marshal(formSubmission)
-	if (err != nil) {
+	if err != nil {
 		return &FormSubmissionResponse{}, err
 	}
 
 	buf := bytes.NewBuffer(rawSubmission)
 
 	req, err := http.NewRequest("POST", TYPEFORM_API+"forms", buf)
-	if (err != nil) {
+	if err != nil {
 		return &FormSubmissionResponse{}, err
 	}
 
 	req.Header.Add("x-api-token", authToken)
 
-	if (debug) {
+	if debug {
 		dump, err := httputil.DumpRequest(req, true)
-		if (err != nil) {
+		if err != nil {
 			log.Printf("DEBUG - Could not dump request: \n %v \n", err)
 		} else {
 			log.Printf("DEBUG - Full request: \n %v \n", string(dump))
@@ -34,13 +34,13 @@ func CreateForm(authToken string, debug bool, formSubmission *FormSubmission) (*
 	}
 
 	res, err := http.DefaultClient.Do(req)
-	if (err != nil) {
+	if err != nil {
 		return &FormSubmissionResponse{}, err
 	}
 
-	if (debug) {
+	if debug {
 		dump, err := httputil.DumpResponse(res, true)
-		if (err != nil) {
+		if err != nil {
 			log.Printf("DEBUG - Could not dump response: \n %v \n", err)
 		} else {
 			log.Printf("DEBUG - Full response: \n %v \n", string(dump))
@@ -49,18 +49,18 @@ func CreateForm(authToken string, debug bool, formSubmission *FormSubmission) (*
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-	if (err != nil) {
+	if err != nil {
 		return &FormSubmissionResponse{}, err
 	}
 
-	if (res.StatusCode != 200 && res.StatusCode != 201) {
+	if res.StatusCode != 200 && res.StatusCode != 201 {
 		err = NewRequestError(res.StatusCode, res.Request.URL.String(), string(body))
 		return &FormSubmissionResponse{}, err
 	}
 
 	var resp FormSubmissionResponse
 	err = json.Unmarshal(body, &resp)
-	if (err != nil) {
+	if err != nil {
 		return &FormSubmissionResponse{}, err
 	}
 
@@ -71,39 +71,35 @@ func GetForm(authToken string) {
 
 }
 
-func NewFormSubmission (title string, webhook string, queryStrings map[string]string, fields []FieldWrapper) *FormSubmission {
+func NewFormSubmission(title string, webhook string, queryStrings map[string]string, designId int, fields []FieldWrapper) *FormSubmission {
 	//TODO encode querystrings here
 
-	return &FormSubmission{
-		Fields : fields,
-		WebhookSubmitURL : webhook,
-		Title : title,
+	formSubmission := &FormSubmission{
+		Fields:           fields,
+		WebhookSubmitURL: webhook,
+		Title:            title,
 	}
+
+	if designId > -1 {
+		formSubmission.DesignId = designId
+	}
+
+	if len(queryStrings) > 0 {
+
+	}
+
+	return formSubmission
 }
 
 type FormSubmission struct {
-	Fields []FieldWrapper `json:"fields"`
-	Title            string `json:"title"`
-	WebhookSubmitURL string `json:"webhook_submit_url"`
+	Fields           []FieldWrapper `json:"fields"`
+	Title            string         `json:"title"`
+	DesignId         int            `json:"design_id,omitempty"`
+	WebhookSubmitURL string         `json:"webhook_submit_url"`
 }
 
-//ShortTextField
-//LongTextField
-//MultipleChoiceField
-//PictureChoiceField
-//StatementField
-//DropdownField
-//YesNoField
-//NumberField
-//RatingField
-//OpinionScaleField
-//EmailField
-//WebsiteField
-//LegalField
-
-
 func NewChoice(imageId int, label string) *Choice {
-	choice := &Choice{Label: label,}
+	choice := &Choice{Label: label}
 	if imageId > 0 {
 		choice.ImageID = imageId
 	}
@@ -116,12 +112,12 @@ type Choice struct {
 }
 
 type FormSubmissionResponse struct {
-	FieldsRaw []json.RawMessage `json:"fields"`
-	Fields []FieldWrapper `json:"-"`
-	ID    string `json:"id"`
-	Links []Link `json:"links"`
-	Title            string `json:"title"`
-	WebhookSubmitURL string `json:"webhook_submit_url"`
+	FieldsRaw        []json.RawMessage `json:"fields"`
+	Fields           []FieldWrapper    `json:"-"`
+	ID               string            `json:"id"`
+	Links            []Link            `json:"links"`
+	Title            string            `json:"title"`
+	WebhookSubmitURL string            `json:"webhook_submit_url"`
 }
 
 type Link struct {
@@ -132,7 +128,6 @@ type Link struct {
 type formResp FormSubmissionResponse
 
 func (t *FormSubmissionResponse) UnmarshalJSON(data []byte) error {
-
 	resp := formResp{}
 	err := json.Unmarshal(data, &resp)
 	if err != nil {
@@ -144,10 +139,10 @@ func (t *FormSubmissionResponse) UnmarshalJSON(data []byte) error {
 		var field Field
 		err = json.Unmarshal(rawMessage, &field)
 		switch field.Type {
-			case "long_text", "short_text":
+		case "long_text", "short_text":
 			var txtField TextField
 			err = json.Unmarshal(rawMessage, &txtField)
-			if (err == nil) {
+			if err == nil {
 				t.Fields = append(t.Fields, txtField)
 				continue
 			} else {

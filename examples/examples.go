@@ -1,14 +1,24 @@
 package main
+
 import (
-	"os"
 	"github.com/zachgoldstein/go-typeform"
 	"log"
+	"os"
 )
 
-func main () {
+func main() {
 	typeformKey := os.Getenv("TYPEFORM_KEY")
 	api := typeform.NewApi(typeformKey)
 	api.DebugMode = true
+
+	colors := typeform.NewColors("#3D3D3D", "#4FB0AE", "#4FB0AE", "#FFFFFF")
+	designBackground, err := api.CreateImage("http://i.imgur.com/EVOFpNF.png")
+	design := typeform.NewDesign(colors, "Bangers", designBackground.Id)
+	createdDesign, err := api.CreateDesign(design)
+	if err != nil {
+		log.Printf("Could not create design err: %#v", err)
+		return
+	}
 
 	shortTextField := typeform.NewShortTextField(140, "A Simple Question", "What is your name?", true)
 	longTextField := typeform.NewLongTextField(140, "A Longer Question", "Tell me about your sassy self", true)
@@ -16,7 +26,7 @@ func main () {
 	fightAHorseDuck := typeform.NewChoice(-1, "A horse sized duck")
 	fightADuckHorse := typeform.NewChoice(-1, "A thousand duck sized horses")
 	fightNothing := typeform.NewChoice(-1, "Nothing, we're all pals now and it's amazing")
-	mcChoiceField := typeform.NewMultipleChoiceField("A Question of self", "What would you fight?", true, []typeform.Choice{*fightAHorseDuck, *fightADuckHorse, *fightNothing} )
+	mcChoiceField := typeform.NewMultipleChoiceField("A Question of self", "What would you fight?", true, []typeform.Choice{*fightAHorseDuck, *fightADuckHorse, *fightNothing})
 
 	horseDuckImg, err := api.CreateImage("http://i.imgur.com/t5IQH2o.jpg")
 	fightAHorseDuck = typeform.NewChoice(horseDuckImg.Id, "A horse sized duck")
@@ -24,13 +34,13 @@ func main () {
 	fightADuckHorse = typeform.NewChoice(duckHorseImg.Id, "A thousand duck sized horses")
 	nothingImg, err := api.CreateImage("http://i.imgur.com/FWt2Y.jpg")
 	fightNothing = typeform.NewChoice(nothingImg.Id, "Nothing, we're all pals now and it's amazing")
-	picChoiceField := typeform.NewPictureChoiceField("A visual question of self", "What would you seriously fight?", true, []typeform.Choice{*fightAHorseDuck, *fightADuckHorse, *fightNothing} )
+	picChoiceField := typeform.NewPictureChoiceField("A visual question of self", "What would you seriously fight?", true, []typeform.Choice{*fightAHorseDuck, *fightADuckHorse, *fightNothing})
 
 	statementField := typeform.NewStatementField("Please take this super seriously", "They are life and death questions", true)
 
 	holyGrailChoice := typeform.NewChoice(-1, "To seek the holy grail")
 	swallowChoice := typeform.NewChoice(-1, "To seek an unladed swallow")
-	dropdownField := typeform.NewDropdownField("What is your quest?", "we all have one", true, []typeform.Choice{*holyGrailChoice, *swallowChoice} )
+	dropdownField := typeform.NewDropdownField("What is your quest?", "we all have one", true, []typeform.Choice{*holyGrailChoice, *swallowChoice})
 
 	yesNoField := typeform.NewYesNoField("Would you ride a t-rex around if you could?", "Super fun, super dangerous....", true)
 
@@ -62,14 +72,14 @@ func main () {
 		legalField,
 	}
 
-	formSubmission := typeform.NewFormSubmission("A simple form", "123", map[string]string{}, fields )
+	formSubmission := typeform.NewFormSubmission("A simple form", "123", map[string]string{}, createdDesign.Id, fields)
 
-	resp, err := api.CreateForm( formSubmission )
-	if (err != nil) {
+	resp, err := api.CreateForm(formSubmission)
+	if err != nil {
 		log.Printf("Could not create form err: %#v", err)
 		return
 	}
 
 	test, ok := resp.Fields[0].(typeform.TextField) //cast fields in the resp like so
-	log.Println("form field 1 test ",test, " ok: ", ok)
+	log.Println("form field 1 test ", test, " ok: ", ok)
 }
