@@ -2,4 +2,6 @@
 
 A go wrapper for the typeform io api
 
-(Nothing works yet, work in progress)
+` go get github.com/zachgoldstein/go-typeform `
+
+see examples/example.go for more information
