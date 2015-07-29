@@ -80,6 +80,15 @@ func main() {
 		return
 	}
 
-	test, ok := resp.Fields[0].(typeform.TextField) //cast fields in the resp like so
-	log.Println("form field 1 test ", test, " ok: ", ok)
+	test, ok := resp.Fields[5].(typeform.YesNoField) //cast fields in the resp like so
+	log.Println("form field 5 test ", test, " ok: ", ok)
+
+	existingForm, err := api.GetForm(resp.ID)
+	if err != nil {
+		log.Printf("Could not create form err: %#v", err)
+		return
+	}
+	log.Printf("\n retrieved form %v", existingForm)
+
+
 }

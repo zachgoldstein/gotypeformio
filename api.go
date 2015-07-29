@@ -37,8 +37,8 @@ func (a *API) CreateForm(formSubmission *FormSubmission) (resp *FormSubmissionRe
 	return CreateForm(a.AuthToken, a.DebugMode, formSubmission)
 }
 
-func (a *API) GetForm() {
-	GetForm(a.AuthToken)
+func (a *API) GetForm(id string) (*FormSubmissionResponse, error)  {
+	return GetForm(a.AuthToken, a.DebugMode, id)
 }
 
 func (a *API) CreateImage(urlstr string) (img *Image, err error) {
