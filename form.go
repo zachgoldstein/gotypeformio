@@ -1,4 +1,4 @@
-package typeform
+package gotypeformio
 
 import (
 	"bytes"

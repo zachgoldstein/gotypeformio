@@ -1,4 +1,4 @@
-package typeform
+package gotypeformio
 
 type FormResults struct {
 	Answers []struct {

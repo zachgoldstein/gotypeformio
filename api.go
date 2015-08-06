@@ -1,4 +1,4 @@
-package typeform
+package gotypeformio
 
 import "fmt"
 
@@ -37,7 +37,7 @@ func (a *API) CreateForm(formSubmission *FormSubmission) (resp *FormSubmissionRe
 	return CreateForm(a.AuthToken, a.DebugMode, formSubmission)
 }
 
-func (a *API) GetForm(id string) (*FormSubmissionResponse, error)  {
+func (a *API) GetForm(id string) (*FormSubmissionResponse, error) {
 	return GetForm(a.AuthToken, a.DebugMode, id)
 }
 
